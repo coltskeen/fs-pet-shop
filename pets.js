@@ -21,17 +21,17 @@ function read(index) {
 }
 
 
-//WRITE FUNCTION
+//WRITE FUNCTION TO CREATE A NEW OBJ THAT DOESN'T OVERRIDE OLD DATA
 function create(newAnimal) {
     let currValues = JSON.parse(fs.readFileSync('./pets.json', 'utf-8'));
     newAnimal.age = Number(newAnimal.age);
     currValues.push(newAnimal);
-    console.log(currValues);
     fs.writeFile("./pets.json", JSON.stringify(currValues), (error) => {
         if (newAnimal.age === undefined || newAnimal.kind === undefined || newAnimal.name === undefined) {
-            console.log('Usage: node pets.js create AGE KIND NAME');
+            console.error('Usage: node pets.js create AGE KIND NAME');
+            process.exit(1);
         } else {
-            console.log(currValues);
+            console.log(newAnimal);
         }
     })
 }
