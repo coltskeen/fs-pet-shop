@@ -37,6 +37,21 @@ function create(newAnimal) {
 }
 
 
+//BONUS 1: WRITE A FUNCTION TO UPDATE EXISTING RECORDS
+function update(index, updatedAnimal) {
+    let currValues = JSON.parse(fs.readFileSync('./pets.json', 'utf-8'));
+    updatedAnimal.age = Number(updatedAnimal.age);
+    currValues[index] = updatedAnimal;
+    fs.writeFile("./pets.json", JSON.stringify(currValues), (err) => {
+        if (process.argv[3] === undefined || updatedAnimal.age === undefined || updatedAnimal.kind === undefined || updatedAnimal.name === undefined) {
+            console.error("Usage: node pets.js update INDEX AGE KIND NAME");
+            process.exit(1);
+        } else {
+            console.log(currValues);
+        }
+    })
+}
+
 
 let subcommand = process.argv[2];
 if (subcommand === "read") {
@@ -51,6 +66,13 @@ if (subcommand === "read") {
     create(newAnimal);
 } else if (subcommand === "update") {
     console.log("updating file");
+    let index = process.argv[3];
+    let updatedAnimal = {
+        age: process.argv[4],
+        kind: process.argv[5],
+        name: process.argv[6]
+    }
+    update(index, updatedAnimal);
 } else if (subcommand === "destroy") {
     console.log("destroying file");
 } else {
