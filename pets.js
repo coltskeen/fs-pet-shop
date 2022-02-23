@@ -1,33 +1,59 @@
+// console.log(process.argv);
+
+//IMPORT FS
 let fs = require('fs');
 
-function read(param) {
+//READ FUNCTIONS
+function read(index) {
     fs.readFile('./pets.json', 'utf8', function(error, data) {
         let parsedData = JSON.parse(data);
-        if (parsedData[param]) {
-            console.log(parsedData[param]);
+        if (error) {
+            throw error;
+        } else if (parsedData[index]) {
+            console.log(parsedData[index]);
+        } else if (index > parsedData.length - 1 || index < parsedData[0]) {
+            console.error("Usage: node pets.js read INDEX");
+            process.exit(1);
         } else {
-            console.log("Usage: node pets.js read INDEX");
+            console.log(parsedData);
         }
     })
 }
 
-function create() {
-    
+
+//WRITE FUNCTION
+function create(newAnimal) {
+    let currValues = JSON.parse(fs.readFileSync('./pets.json', 'utf-8'));
+    newAnimal.age = Number(newAnimal.age);
+    currValues.push(newAnimal);
+    console.log(currValues);
+    fs.writeFile("./pets.json", JSON.stringify(currValues), (error) => {
+        if (newAnimal.age === undefined || newAnimal.kind === undefined || newAnimal.name === undefined) {
+            console.log('Usage: node pets.js create AGE KIND NAME');
+        } else {
+            console.log(currValues);
+        }
+    })
 }
 
 
 
 let subcommand = process.argv[2];
 if (subcommand === "read") {
-    let param = process.argv[3];
-    read(param);
+    let index = process.argv[3];
+    read(index);
 } else if (subcommand === "create") {
-    console.log("creating file");
+    let newAnimal = {
+        age: process.argv[3],
+        kind: process.argv[4],
+        name: process.argv[5]
+    }
+    create(newAnimal);
 } else if (subcommand === "update") {
     console.log("updating file");
 } else if (subcommand === "destroy") {
     console.log("destroying file");
 } else {
     console.error("Usage: node pets.js [read | create | update | destroy]");
-    // process.exit(1);
+    process.exit(1);
 }
