@@ -53,6 +53,31 @@ const server = http.createServer((req, res) => {
                 res.end();
             }
         });
+    } else if (req.method === "POST" && req.url === "/pets") {
+        let body = "";
+        req.on("data", (data) => {
+            body += data;
+        });
+        req.on("end", () => {
+            let currValues = JSON.parse(fs.readFileSync('./pets.json', 'utf-8'));
+            currValues.push(JSON.parse(body));
+            fs.writeFile("./pets.json", JSON.stringify(currValues), (err) => {
+                if(err) { 
+                    res.statusCode = 404;
+                    res.setHeader("Content-Type", "text/plain");
+                    res.write("Not Found");
+                    res.end();
+                } else {
+                    res.writeHeader(200, {"Content-Type": "application/json"});
+                    res.end();
+                }
+            })
+        });
+    } else {
+        res.statusCode = 404;
+        res.setHeader("Content-Type", "text/plain");
+        res.write("Not Found");
+        res.end();
     }
 
 });
