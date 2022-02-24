@@ -39,6 +39,20 @@ const server = http.createServer((req, res) => {
                 res.end();
             }
         });
+    } else if (req.method === "GET" && !petRegExp.test(req.url)) {
+        fs.readFile("./pets.json", 'utf8', (err, data) => {
+            let parsedData = JSON.parse(data);
+            if(err){
+                res.statusCode = 500;
+                res.statusMessage = "ERROR: Problem reading file.";
+                res.end();
+            } else {
+                res.statusCode = 404;
+                res.setHeader("Content-Type", "text/plain");
+                res.write("Not Found");
+                res.end();
+            }
+        });
     }
 
 });
