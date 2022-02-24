@@ -52,6 +52,19 @@ function update(index, updatedAnimal) {
     })
 }
 
+//BONUS 2: WRITE A FUNCTION TO DESTROY EXISTING RECORDS
+function destroy(index) {
+    let currValues = JSON.parse(fs.readFileSync('./pets.json', 'utf-8'));
+    console.log(currValues[index]);
+    currValues.splice(index, 1);
+    fs.writeFile("./pets.json", JSON.stringify(currValues), (err) => {
+        if (process.argv[3] === undefined) {
+            console.error("Usage: node pets.js destroy INDEX");
+            process.exit(1);
+        } 
+    })
+}
+
 
 let subcommand = process.argv[2];
 if (subcommand === "read") {
@@ -73,7 +86,8 @@ if (subcommand === "read") {
     }
     update(index, updatedAnimal);
 } else if (subcommand === "destroy") {
-    console.log("destroying file");
+    let index = process.argv[3];
+    destroy(index);
 } else {
     console.error("Usage: node pets.js [read | create | update | destroy]");
     process.exit(1);
