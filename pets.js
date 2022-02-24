@@ -47,7 +47,7 @@ function update(index, updatedAnimal) {
             console.error("Usage: node pets.js update INDEX AGE KIND NAME");
             process.exit(1);
         } else {
-            console.log(currValues);
+            console.log(updatedAnimal);
         }
     })
 }
@@ -65,7 +65,6 @@ if (subcommand === "read") {
     }
     create(newAnimal);
 } else if (subcommand === "update") {
-    console.log("updating file");
     let index = process.argv[3];
     let updatedAnimal = {
         age: process.argv[4],
