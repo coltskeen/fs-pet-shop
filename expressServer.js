@@ -15,7 +15,6 @@ app.use(express.urlencoded({extended: true}));
 
 //GET REQUEST/RESPONSE
 app.get("/pets", (req, res) => {
-    req.get("Content-Type");
     res.set("Content-Type", "application/json").status(200).send(petsData);
 });
 
