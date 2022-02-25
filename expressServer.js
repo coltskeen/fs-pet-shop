@@ -7,6 +7,7 @@ const app = express();
 const PORT = 8000;
 let petsData = JSON.parse(fs.readFileSync('./pets.json', 'utf-8'));
 
+
 //ESTABLISH MIDDLEWARE
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -20,11 +21,24 @@ app.get("/pets", (req, res) => {
 
 app.get("/pets/:index", (req, res) => {
     let index = req.params.index;
-    console.log(index);
     req.get("Content-Type");
-    res.set("Content-Type", "application/json").status(200).send(petsData[index]);
+    fs.readFile("./pets.json", "utf8", (err, data) => {
+        let parsedData = JSON.parse(data);
+        if (err) {
+            throw err;
+        } else if (parsedData[index]) {
+            res.set("Content-Type", "application/json").status(200).send(parsedData[index]);
+        } else {
+            res.set("Content-Type", "text/plain").status(404).send("Not Found");
+        }
+    })
 });
 
+//CATCH-ALL ERROR HANDLING
+app.use((req, res, next) => {
+    res.status(404).send("Not Found");
+})
+
+//LISTEN ON PORT
 app.listen(PORT, () => console.log("Listening on PORT: " + PORT));
 
-//GET	/pets	200	application/json	[{ "age": 7, "kind": "rainbow", "name": "fido" }, { "age": 5, "kind": "snake", "name": "Buttons" }]
