@@ -43,64 +43,51 @@ app.post('/pets', (req, res) => {
 app.get("/pets/:pet_id", (req, res) => {
     let id = req.params.pet_id;
 
-    //If the id isn't given return a 404 error
-    if(!id) return res.status(404).send("Not Found");
-
-    //else run the pool query
-    else {
-        pool
-            .query("SELECT * FROM pets WHERE id = $1;", [id])
-            .then((result) => {
-                //if the result at that id has no data in the table return 404 error
-                if (result.rows.length === 0) return res.status(404).send("Not Found");
-                //else return the table data
-                else return res.send(result.rows[0]);
-            })
-            .catch((err) => res.sendStatus(500));
-    }
+    pool
+        .query("SELECT * FROM pets WHERE id = $1;", [id])
+        .then((result) => {
+            //if the result at that id has no data in the table return 404 error
+            if (result.rows.length === 0) return res.status(404).send("Not Found");
+            //else return the table data
+            else return res.send(result.rows[0]);
+        })
+        .catch((err) => res.sendStatus(500));
 });
 
 //PATCH REQUEST AT INDEX
-app.patch('/pets/:id', (req, res) => {
-    let id = req.params.id;
-    let updatedPet = req.body;
+app.patch('/pets/:pet_id', (req, res) => {
+    let id = req.params.pet_id;
+    let { name, age, kind } = req.body;
 
-    // define the patch
-    fs.readFile("./pets.json", "utf8", (err, data) => {
-        let parsedData = JSON.parse(data);
-        parsedData[id] = { ...parsedData[id], ...updatedPet};
+    let query = `
+    UPDATE pets SET
+        name = COALESCE($1, name),
+        age = COALESCE($2, age),
+        kind = COALESCE($3, kind)
+    WHERE id = $4 RETURNING *;`
+    ;
 
-        fs.writeFile("./pets.json", JSON.stringify(parsedData), (err) => {
-            if(err) { 
-                res.status(500).send();
-            } else { 
-                res.set("Content-Type", "application/json").status(201).send(parsedData); 
-            }
+    pool
+        .query(query, [name, age, kind, id])
+        .then((result) => {
+            if (result.rows.length === 0) return res.status(404).send("Not Found");
+            else return res.status(201).send(result.rows[0]);
         })
-            
-    });
-
+        .catch((err) => res.sendStatus(500));
 });
 
 //DELETE REQUEST
-app.delete("/pets/:id", (req, res) => {
-    let id = req.params.id;
-
-    fs.readFile("./pets.json", "utf-8", (err, data) => {
-        let parsedData = JSON.parse(data);
-        parsedData.splice(id, 1);
-
-        fs.writeFile("./pets.json", JSON.stringify(parsedData), (err) => {
-            if (err) {
-                res.status(500).send();
-            } else if (parsedData) {
-                res.set("Content-Type", "application/json").status(200).send("DELETE REQUEST SUCCESSFUL");
-            } else {
-                res.set("Content-Type", "text/plain"). status(404).send("Not Found");
-            }
+app.delete("/pets/:pet_id", (req, res) => {
+    let id = req.params.pet_id;
+    
+    pool
+        .query("DELETE FROM pets WHERE id=$1;", [id])
+        .then((result) => {
+            if(result.rowCount === 0) return res.status(404).send("Not Found");
+            else return res.sendStatus(204);
         })
-    })
-})
+        .catch((err) => res.sendStatus(500));
+});
 
 //CATCH-ALL ERROR HANDLING
 app.use((req, res, next) => {
